@@ -19,11 +19,8 @@ namespace AerialodSlopefield
             [Option("y2", Required = true, HelpText = "The Y coordinate of the second corner of the area to render.")]
             public double Y2 { get; set; }
 
-            [Option("xs", Required = true, HelpText = "The step for X values.")]
-            public double XS { get; set; }
-
-            [Option("ys", Required = true, HelpText = "The step for Y values.")]
-            public double YS { get; set; }
+            [Option("step", Required = true, HelpText = "The X and Y step.")]
+            public double GridStep { get; set; }
         }
 
         static void Main(string[] args)
@@ -38,8 +35,8 @@ namespace AerialodSlopefield
             var xmax = Math.Max(o.X1, o.X2);
             var ymin = Math.Min(o.Y1, o.Y2);
             var ymax = Math.Max(o.Y1, o.Y2);
-            var xsteps = (int)Math.Floor((xmax - xmin) / o.XS);
-            var ysteps = (int)Math.Floor((ymax - ymin) / o.YS);
+            var xsteps = (int)Math.Floor((xmax - xmin) / o.GridStep);
+            var ysteps = (int)Math.Floor((ymax - ymin) / o.GridStep);
             double[,] results = new double[xsteps, ysteps];
 
             int currentXStep = 0;
@@ -49,18 +46,21 @@ namespace AerialodSlopefield
             double maxVal = double.MinValue;
             double lastResult;
 
-            for (var y = ymin; y < ymax; y += o.YS)
+            for (var y = ymin; y < ymax; y += o.GridStep)
             {
-                for (var x = xmin; x < xmax; x += o.XS)
+                for (var x = xmin; x < xmax; x += o.GridStep)
                 {
                     results[currentXStep, currentYStep] = lastResult = MyFunc(x, y);
-                    if (lastResult > maxVal)
+                    if (double.IsNormal(lastResult))
                     {
-                        maxVal = lastResult;
-                    }
-                    if (lastResult < minVal)
-                    {
-                        minVal = lastResult;
+                        if (lastResult > maxVal)
+                        {
+                            maxVal = lastResult;
+                        }
+                        if (lastResult < minVal)
+                        {
+                            minVal = lastResult;
+                        }
                     }
                     currentXStep++;
                 }
@@ -69,6 +69,13 @@ namespace AerialodSlopefield
             }
 
             var delta = maxVal - minVal;
+
+            Console.WriteLine("ncols " + ysteps);
+            Console.WriteLine("nrows " + xsteps);
+            Console.WriteLine("xllcorner " + xmin);
+            Console.WriteLine("yllcorner " + ymin);
+            Console.WriteLine("cellsize " + o.GridStep);
+            Console.WriteLine("NODATA_value -1");
 
             for (var y = 0; y < ysteps; y++)
             {
