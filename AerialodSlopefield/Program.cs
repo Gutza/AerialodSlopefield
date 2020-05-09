@@ -74,7 +74,7 @@ namespace AerialodSlopefield
             {
                 for (var x = 0; x < xsteps; x++)
                 {
-                    if (results[x, y] != double.NaN)
+                    if (double.IsNormal(results[x, y]))
                     {
                         results[x, y] = (results[x, y] - minVal) / delta;
                         Console.Write(results[x, y] + " ");
