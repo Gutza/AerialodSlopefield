@@ -21,6 +21,9 @@ namespace AerialodSlopefield
 
             [Option("step", Required = true, HelpText = "The X and Y step.")]
             public double GridStep { get; set; }
+
+            [Option("raw", Required = false, HelpText = "If specified, the final arctan() function is not applied, so you basically get the graph of your function.")]
+            public bool RenderRaw { get; set; }
         }
 
         static void Main(string[] args)
@@ -39,18 +42,24 @@ namespace AerialodSlopefield
             var ysteps = (int)Math.Floor((ymax - ymin) / o.GridStep);
             double[,] results = new double[xsteps, ysteps];
 
-            int currentXStep = 0;
-            int currentYStep = 0;
-
             double minVal = double.MaxValue;
             double maxVal = double.MinValue;
             double lastResult;
 
-            for (var y = ymin; y < ymax; y += o.GridStep)
+            for (var yindex = 0; yindex < ysteps; yindex++)
             {
-                for (var x = xmin; x < xmax; x += o.GridStep)
+                for (var xindex = 0; xindex < xsteps; xindex++)
                 {
-                    results[currentXStep, currentYStep] = lastResult = MyFunc(x, y);
+                    var xpos = xmin + xindex * o.GridStep;
+                    var ypos = ymin + yindex * o.GridStep;
+                    if (o.RenderRaw)
+                    {
+                        results[xindex, yindex] = lastResult = MyFunc(xpos, ypos);
+                    }
+                    else
+                    {
+                        results[xindex, yindex] = lastResult = Math.Atan(MyFunc(xpos, ypos));
+                    }
                     if (double.IsNormal(lastResult))
                     {
                         if (lastResult > maxVal)
@@ -62,10 +71,7 @@ namespace AerialodSlopefield
                             minVal = lastResult;
                         }
                     }
-                    currentXStep++;
                 }
-                currentYStep++;
-                currentXStep = 0;
             }
 
             var delta = maxVal - minVal;
@@ -77,14 +83,14 @@ namespace AerialodSlopefield
             Console.WriteLine("cellsize " + o.GridStep);
             Console.WriteLine("NODATA_value -1");
 
-            for (var y = 0; y < ysteps; y++)
+            for (var yindex = 0; yindex < ysteps; yindex++)
             {
-                for (var x = 0; x < xsteps; x++)
+                for (var xindex = 0; xindex < xsteps; xindex++)
                 {
-                    if (double.IsNormal(results[x, y]))
+                    if (double.IsNormal(results[xindex, yindex]))
                     {
-                        results[x, y] = (results[x, y] - minVal) / delta;
-                        Console.Write(results[x, y] + " ");
+                        results[xindex, yindex] = (results[xindex, yindex] - minVal) / delta;
+                        Console.Write(results[xindex, yindex] + " ");
                     }
                     else
                     {
@@ -97,7 +103,7 @@ namespace AerialodSlopefield
 
         private static double MyFunc(double x, double y)
         {
-            return Math.Cos(x / y);
+            return x * x / y;
         }
     }
 }
