@@ -132,11 +132,11 @@ namespace AerialodSlopefield
                 var ypos = ymin + yindex * gridStep;
                 if (renderRaw)
                 {
-                    result[xindex] = lastResult = MyFunc(xpos, ypos);
+                    result[xindex] = lastResult = RenderFunction.MyFunction(xpos, ypos);
                 }
                 else
                 {
-                    result[xindex] = lastResult = Math.Atan(MyFunc(xpos, ypos));
+                    result[xindex] = lastResult = Math.Atan(RenderFunction.MyFunction(xpos, ypos));
                 }
                 if (double.IsNormal(lastResult))
                 {
@@ -167,11 +167,6 @@ namespace AerialodSlopefield
             }
 
             return new FileOutput.FileOutput(filename);
-        }
-
-        private static double MyFunc(double x, double y)
-        {
-            return x * x / y;
         }
     }
 }

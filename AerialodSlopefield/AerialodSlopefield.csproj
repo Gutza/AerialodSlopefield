@@ -5,6 +5,8 @@
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <Authors>Bogdan Stăncescu</Authors>
     <Company />
+    <PackageProjectUrl>https://github.com/Gutza/AerialodSlopefield</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/Gutza/AerialodSlopefield</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
