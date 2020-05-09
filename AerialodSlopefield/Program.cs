@@ -1,5 +1,7 @@
-﻿using CommandLine;
+﻿using AerialodSlopefield.Outputs;
+using CommandLine;
 using System;
+using System.Text;
 
 namespace AerialodSlopefield
 {
@@ -24,6 +26,9 @@ namespace AerialodSlopefield
 
             [Option("raw", Required = false, HelpText = "If specified, the final arctan() function is not applied, so you basically get the graph of your function.")]
             public bool RenderRaw { get; set; }
+
+            [Option('f', "filename", Required = false, HelpText = "The name of the file to write to. If the parameter is not specified, the output is sent to the console. You probably want to specify an ASC extension.")]
+            public string Filename { get; set; }
         }
 
         static void Main(string[] args)
@@ -75,29 +80,30 @@ namespace AerialodSlopefield
             }
 
             var delta = maxVal - minVal;
-
-            Console.WriteLine("ncols " + ysteps);
-            Console.WriteLine("nrows " + xsteps);
-            Console.WriteLine("xllcorner " + xmin);
-            Console.WriteLine("yllcorner " + ymin);
-            Console.WriteLine("cellsize " + o.GridStep);
-            Console.WriteLine("NODATA_value -1");
+            IOutput output = new OutputConsole();
+            output.WriteLine("ncols " + ysteps);
+            output.WriteLine("nrows " + xsteps);
+            output.WriteLine("xllcorner " + xmin);
+            output.WriteLine("yllcorner " + ymin);
+            output.WriteLine("cellsize " + o.GridStep);
+            output.WriteLine("NODATA_value -1");
 
             for (var yindex = 0; yindex < ysteps; yindex++)
             {
+                var line = new StringBuilder(xsteps * 10);
                 for (var xindex = 0; xindex < xsteps; xindex++)
                 {
                     if (double.IsNormal(results[xindex, yindex]))
                     {
                         results[xindex, yindex] = (results[xindex, yindex] - minVal) / delta;
-                        Console.Write(results[xindex, yindex] + " ");
+                        line.Append(results[xindex, yindex] + " ");
                     }
                     else
                     {
-                        Console.Write("-1 ");
+                        line.Append("-1 ");
                     }
                 }
-                Console.WriteLine();
+                output.WriteLine(line.ToString());
             }
         }
 
