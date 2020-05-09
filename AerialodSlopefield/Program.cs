@@ -15,16 +15,22 @@ namespace AerialodSlopefield
             [Option("x1", Default = -10, HelpText = "The X coordinate of the first corner of the area to render.")]
             public double X1 { get; set; }
 
-            [Option("y1", Default = -10, HelpText = "The Y coordinate of the first corner of the area to render.")]
-            public double Y1 { get; set; }
-
             [Option("x2", Default = 10, HelpText = "The X coordinate of the second corner of the area to render.")]
             public double X2 { get; set; }
+
+            [Option('x', "xscale", Default = 1, HelpText = "Resize the X range by this factor. For instance, if you use the default x1 and x2 values, and you set xscale to 1.3 then you will end up rendering the area between x1=-13.0 and x2=13.0")]
+            public double XScale { get; set; }
+
+            [Option("y1", Default = -10, HelpText = "The Y coordinate of the first corner of the area to render.")]
+            public double Y1 { get; set; }
 
             [Option("y2", Default = 10, HelpText = "The Y coordinate of the second corner of the area to render.")]
             public double Y2 { get; set; }
 
-            [Option("step", Default = 0.1, HelpText = "The X and Y step.")]
+            [Option('y', "yscale", Default = 1, HelpText = "Resize the Y range by this factor. For instance, if you use the default y1 value, you set y2 to 100, and you set yscale to 3.14 then you will end up rendering the area between y1=-31.4 and y2=314.0")]
+            public double YScale { get; set; }
+
+            [Option('s', "step", Default = 0.1, HelpText = "The X and Y step.")]
             public double GridStep { get; set; }
 
             [Option('r', "raw", Default = false, HelpText = "If specified, the final arctan() function is not applied, so you basically get the graph of your function.")]
@@ -48,12 +54,16 @@ namespace AerialodSlopefield
 
         private static void GenerateSlopeField(Options o)
         {
+            o.X1 *= o.XScale;
+            o.X2 *= o.XScale;
+            o.Y1 *= o.YScale;
+            o.Y2 *= o.YScale;
             var xmin = Math.Min(o.X1, o.X2);
             var xmax = Math.Max(o.X1, o.X2);
             var ymin = Math.Min(o.Y1, o.Y2);
             var ymax = Math.Max(o.Y1, o.Y2);
-            var xsteps = (int)Math.Floor((xmax - xmin) / o.GridStep);
-            var ysteps = (int)Math.Floor((ymax - ymin) / o.GridStep);
+            var xsteps = (int)Math.Ceiling((xmax - xmin) / o.GridStep);
+            var ysteps = (int)Math.Ceiling((ymax - ymin) / o.GridStep);
             double[][] resultMatrix = new double[ysteps][];
 
             double minVal = double.MaxValue;
