@@ -45,38 +45,17 @@ namespace AerialodSlopefield
             var ymax = Math.Max(o.Y1, o.Y2);
             var xsteps = (int)Math.Floor((xmax - xmin) / o.GridStep);
             var ysteps = (int)Math.Floor((ymax - ymin) / o.GridStep);
-            double[,] results = new double[xsteps, ysteps];
+            double[][] resultMatrix = new double[ysteps][];
 
             double minVal = double.MaxValue;
             double maxVal = double.MinValue;
-            double lastResult;
 
             for (var yindex = 0; yindex < ysteps; yindex++)
             {
-                for (var xindex = 0; xindex < xsteps; xindex++)
-                {
-                    var xpos = xmin + xindex * o.GridStep;
-                    var ypos = ymin + yindex * o.GridStep;
-                    if (o.RenderRaw)
-                    {
-                        results[xindex, yindex] = lastResult = MyFunc(xpos, ypos);
-                    }
-                    else
-                    {
-                        results[xindex, yindex] = lastResult = Math.Atan(MyFunc(xpos, ypos));
-                    }
-                    if (double.IsNormal(lastResult))
-                    {
-                        if (lastResult > maxVal)
-                        {
-                            maxVal = lastResult;
-                        }
-                        if (lastResult < minVal)
-                        {
-                            minVal = lastResult;
-                        }
-                    }
-                }
+                var computation = ComputeRow(yindex, xsteps, xmin, ymin, o.GridStep, o.RenderRaw);
+                resultMatrix[yindex] = computation.RowData;
+                minVal = Math.Min(minVal, computation.MinValue);
+                maxVal = Math.Max(maxVal, computation.MaxValue);
             }
 
             var delta = maxVal - minVal;
@@ -94,10 +73,10 @@ namespace AerialodSlopefield
                 var line = new StringBuilder(xsteps * 10);
                 for (var xindex = 0; xindex < xsteps; xindex++)
                 {
-                    if (double.IsNormal(results[xindex, yindex]))
+                    if (double.IsNormal(resultMatrix[yindex][xindex]))
                     {
-                        results[xindex, yindex] = (results[xindex, yindex] - minVal) / delta;
-                        line.Append(results[xindex, yindex] + " ");
+                        resultMatrix[yindex][xindex] = (resultMatrix[yindex][xindex] - minVal) / delta;
+                        line.Append(resultMatrix[yindex][xindex] + " ");
                     }
                     else
                     {
@@ -106,6 +85,54 @@ namespace AerialodSlopefield
                 }
                 output.WriteLine(line.ToString());
             }
+        }
+
+        class ComputationDTO
+        {
+            internal double[] RowData;
+            internal double MinValue;
+            internal double MaxValue;
+        }
+
+        private static ComputationDTO ComputeRow(int yindex, int xsteps, double xmin, double ymin, double gridStep, bool renderRaw)
+        {
+            var result = new double[xsteps];
+
+            double minVal = double.MaxValue;
+            double maxVal = double.MinValue;
+            double lastResult;
+
+            for (var xindex = 0; xindex < xsteps; xindex++)
+            {
+                var xpos = xmin + xindex * gridStep;
+                var ypos = ymin + yindex * gridStep;
+                if (renderRaw)
+                {
+                    result[xindex] = lastResult = MyFunc(xpos, ypos);
+                }
+                else
+                {
+                    result[xindex] = lastResult = Math.Atan(MyFunc(xpos, ypos));
+                }
+                if (double.IsNormal(lastResult))
+                {
+                    if (lastResult > maxVal)
+                    {
+                        maxVal = lastResult;
+                    }
+                    if (lastResult < minVal)
+                    {
+                        minVal = lastResult;
+                    }
+                }
+            }
+
+            return new ComputationDTO()
+            {
+                RowData = result,
+                MinValue = minVal,
+                MaxValue = maxVal,
+            };
         }
 
         private static IOutput InitializeOutput(string filename)
