@@ -14,7 +14,7 @@ namespace AerialodSlopefield
         /// <returns>The value of your function at (x,y)</returns>
         internal static double MyFunction(double x, double y)
         {
-            return x * x / y;
+            return (x+1000)*x/y;
         }
     }
 }

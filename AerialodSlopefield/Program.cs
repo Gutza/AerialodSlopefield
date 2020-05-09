@@ -12,26 +12,32 @@ namespace AerialodSlopefield
     {
         public class Options
         {
-            [Option("x1", Required = true, HelpText = "The X coordinate of the first corner of the area to render.")]
+            [Option("x1", Default = -10, HelpText = "The X coordinate of the first corner of the area to render.")]
             public double X1 { get; set; }
 
-            [Option("y1", Required = true, HelpText = "The Y coordinate of the first corner of the area to render.")]
+            [Option("y1", Default = -10, HelpText = "The Y coordinate of the first corner of the area to render.")]
             public double Y1 { get; set; }
 
-            [Option("x2", Required = true, HelpText = "The X coordinate of the second corner of the area to render.")]
+            [Option("x2", Default = 10, HelpText = "The X coordinate of the second corner of the area to render.")]
             public double X2 { get; set; }
 
-            [Option("y2", Required = true, HelpText = "The Y coordinate of the second corner of the area to render.")]
+            [Option("y2", Default = 10, HelpText = "The Y coordinate of the second corner of the area to render.")]
             public double Y2 { get; set; }
 
-            [Option("step", Required = true, HelpText = "The X and Y step.")]
+            [Option("step", Default = 0.1, HelpText = "The X and Y step.")]
             public double GridStep { get; set; }
 
-            [Option("raw", Required = false, HelpText = "If specified, the final arctan() function is not applied, so you basically get the graph of your function.")]
+            [Option('r', "raw", Default = false, HelpText = "If specified, the final arctan() function is not applied, so you basically get the graph of your function.")]
             public bool RenderRaw { get; set; }
 
             [Option('f', "filename", Required = false, HelpText = "The name of the file to write to. If the parameter is not specified, the output is sent to the console. You probably want to specify an ASC extension.")]
             public string Filename { get; set; }
+
+            [Option('p', "precision", Default = 4, HelpText = "The precision of the conversion between internally computed values and their ASCII representation in the output file.")]
+            public int Precision { get; set; }
+
+            [Option('d', "denormalize", HelpText = "Do not normalize the output values. By default, the output is normalized between 0 and 1; use this option if you want the actual values returned by your function.")]
+            public bool Denormalize { get; set; }
         }
 
         static void Main(string[] args)
@@ -56,7 +62,7 @@ namespace AerialodSlopefield
             var consoleOutput = InitializeConsoleOutput(o.Filename);
 
             var stopwatch = new Stopwatch();
-            consoleOutput.Write("Starting computations...");
+            consoleOutput.Write("Starting computations [(" + xmin + "," + ymin + ")..(" + xmax + "," + ymax + ")@" + o.GridStep + "]...");
             stopwatch.Start();
             for (var yindex = 0; yindex < ysteps; yindex++)
             {
@@ -82,13 +88,16 @@ namespace AerialodSlopefield
             stopwatch.Restart();
             for (var yindex = 0; yindex < ysteps; yindex++)
             {
-                var line = new StringBuilder(xsteps * 6);
+                var line = new StringBuilder(xsteps * (o.Precision + 2)); // o.Precision + period + space
                 for (var xindex = 0; xindex < xsteps; xindex++)
                 {
                     if (double.IsFinite(resultMatrix[yindex][xindex]))
                     {
-                        resultMatrix[yindex][xindex] = (resultMatrix[yindex][xindex] - minVal) / delta;
-                        line.Append(resultMatrix[yindex][xindex].ToString("F4", CultureInfo.InvariantCulture) + " ");
+                        if (!o.Denormalize)
+                        {
+                            resultMatrix[yindex][xindex] = (resultMatrix[yindex][xindex] - minVal) / delta;
+                        }
+                        line.Append(ValueRenderer(resultMatrix[yindex][xindex], o) + " ");
                     }
                     else
                     {
@@ -99,6 +108,37 @@ namespace AerialodSlopefield
             }
             stopwatch.Stop();
             consoleOutput.WriteLine(" finished in " + stopwatch.Elapsed);
+        }
+
+        private static string ValueRenderer(double value, Options o)
+        {
+            return value.ToString("F" + o.Precision, CultureInfo.InvariantCulture);
+            /*
+            if (value>0.1 && (!o.RenderRaw || !o.Denormalize))
+            {
+                // TODO: Pre-compute the format string
+                return value.ToString("F" + o.Precision, CultureInfo.InvariantCulture);
+            }
+
+            return RoundToSignificantDigits(value, o.Precision);
+            */
+        }
+
+        static string RoundToSignificantDigits(double d, int significantDigits)
+        {
+            /*
+            TODO: This is not currently used because it's buggy.
+            It doesn't work for negative values, and it also returns one too few decimals for numbers less than 1
+            Test it with function return (x+1000)*x/y/(y+1000) AND with function return (x+1000)*x/y/(y+1000)
+            */
+            if (d == 0.0)
+            {
+                return "0";
+            }
+
+            var totalDigits = (int)Math.Log10(d);
+            var format = "F" + Math.Max(0, (significantDigits - totalDigits - 1));
+            return d.ToString(format, CultureInfo.InvariantCulture);
         }
 
         private static IConsoleOutput InitializeConsoleOutput(string filename)
@@ -132,12 +172,13 @@ namespace AerialodSlopefield
                 var xpos = xmin + xindex * gridStep;
                 if (renderRaw)
                 {
-                    result[xindex] = lastResult = RenderFunction.MyFunction(xpos, ypos);
+                    lastResult = RenderFunction.MyFunction(xpos, ypos);
                 }
                 else
                 {
-                    result[xindex] = lastResult = Math.Atan(RenderFunction.MyFunction(xpos, ypos));
+                    lastResult = Math.Atan(RenderFunction.MyFunction(xpos, ypos));
                 }
+                result[xindex] = lastResult;
                 if (double.IsNormal(lastResult))
                 {
                     if (lastResult > maxVal)
