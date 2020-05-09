@@ -71,8 +71,8 @@ namespace AerialodSlopefield
             var delta = maxVal - minVal;
 
             using IOutput output = InitializeOutput(o.Filename);
-            output.WriteLine("ncols " + ysteps);
-            output.WriteLine("nrows " + xsteps);
+            output.WriteLine("ncols " + xsteps);
+            output.WriteLine("nrows " + ysteps);
             output.WriteLine("xllcorner " + xmin);
             output.WriteLine("yllcorner " + ymin);
             output.WriteLine("cellsize " + o.GridStep);
@@ -82,13 +82,13 @@ namespace AerialodSlopefield
             stopwatch.Restart();
             for (var yindex = 0; yindex < ysteps; yindex++)
             {
-                var line = new StringBuilder(xsteps * 4);
+                var line = new StringBuilder(xsteps * 6);
                 for (var xindex = 0; xindex < xsteps; xindex++)
                 {
                     if (double.IsFinite(resultMatrix[yindex][xindex]))
                     {
                         resultMatrix[yindex][xindex] = (resultMatrix[yindex][xindex] - minVal) / delta;
-                        line.Append(resultMatrix[yindex][xindex].ToString("F3", CultureInfo.InvariantCulture) + " ");
+                        line.Append(resultMatrix[yindex][xindex].ToString("F4", CultureInfo.InvariantCulture) + " ");
                     }
                     else
                     {
@@ -126,10 +126,10 @@ namespace AerialodSlopefield
             double maxVal = double.MinValue;
             double lastResult;
 
+            var ypos = ymin + yindex * gridStep;
             for (var xindex = 0; xindex < xsteps; xindex++)
             {
                 var xpos = xmin + xindex * gridStep;
-                var ypos = ymin + yindex * gridStep;
                 if (renderRaw)
                 {
                     result[xindex] = lastResult = RenderFunction.MyFunction(xpos, ypos);
