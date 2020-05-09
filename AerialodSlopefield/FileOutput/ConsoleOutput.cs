@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace AerialodSlopefield.Outputs
+namespace AerialodSlopefield.FileOutput
 {
     class ConsoleOutput : IOutput
     {

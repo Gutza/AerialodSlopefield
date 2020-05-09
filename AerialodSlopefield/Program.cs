@@ -1,6 +1,9 @@
-﻿using AerialodSlopefield.Outputs;
+﻿using AerialodSlopefield.ConsoleOutput;
+using AerialodSlopefield.FileOutput;
 using CommandLine;
 using System;
+using System.Diagnostics;
+using System.Globalization;
 using System.Text;
 
 namespace AerialodSlopefield
@@ -50,6 +53,11 @@ namespace AerialodSlopefield
             double minVal = double.MaxValue;
             double maxVal = double.MinValue;
 
+            var consoleOutput = InitializeConsoleOutput(o.Filename);
+
+            var stopwatch = new Stopwatch();
+            consoleOutput.Write("Starting computations...");
+            stopwatch.Start();
             for (var yindex = 0; yindex < ysteps; yindex++)
             {
                 var computation = ComputeRow(yindex, xsteps, xmin, ymin, o.GridStep, o.RenderRaw);
@@ -57,6 +65,8 @@ namespace AerialodSlopefield
                 minVal = Math.Min(minVal, computation.MinValue);
                 maxVal = Math.Max(maxVal, computation.MaxValue);
             }
+            stopwatch.Stop();
+            consoleOutput.WriteLine(" finished in " + stopwatch.Elapsed);
 
             var delta = maxVal - minVal;
 
@@ -68,15 +78,17 @@ namespace AerialodSlopefield
             output.WriteLine("cellsize " + o.GridStep);
             output.WriteLine("NODATA_value -1");
 
+            consoleOutput.Write("Starting output...");
+            stopwatch.Restart();
             for (var yindex = 0; yindex < ysteps; yindex++)
             {
-                var line = new StringBuilder(xsteps * 10);
+                var line = new StringBuilder(xsteps * 4);
                 for (var xindex = 0; xindex < xsteps; xindex++)
                 {
-                    if (double.IsNormal(resultMatrix[yindex][xindex]))
+                    if (double.IsFinite(resultMatrix[yindex][xindex]))
                     {
                         resultMatrix[yindex][xindex] = (resultMatrix[yindex][xindex] - minVal) / delta;
-                        line.Append(resultMatrix[yindex][xindex] + " ");
+                        line.Append(resultMatrix[yindex][xindex].ToString("F3", CultureInfo.InvariantCulture) + " ");
                     }
                     else
                     {
@@ -85,6 +97,18 @@ namespace AerialodSlopefield
                 }
                 output.WriteLine(line.ToString());
             }
+            stopwatch.Stop();
+            consoleOutput.WriteLine(" finished in " + stopwatch.Elapsed);
+        }
+
+        private static IConsoleOutput InitializeConsoleOutput(string filename)
+        {
+            if (string.IsNullOrEmpty(filename))
+            {
+                return new VoidConsoleOutput();
+            }
+
+            return new RealConsoleOutput();
         }
 
         class ComputationDTO
@@ -139,10 +163,10 @@ namespace AerialodSlopefield
         {
             if (string.IsNullOrEmpty(filename))
             {
-                return new ConsoleOutput();
+                return new FileOutput.ConsoleOutput();
             }
 
-            return new FileOutput(filename);
+            return new FileOutput.FileOutput(filename);
         }
 
         private static double MyFunc(double x, double y)
