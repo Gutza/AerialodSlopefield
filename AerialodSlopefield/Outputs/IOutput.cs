@@ -4,7 +4,7 @@ using System.Text;
 
 namespace AerialodSlopefield.Outputs
 {
-    interface IOutput
+    interface IOutput: IDisposable
     {
         void WriteLine(string line);
     }

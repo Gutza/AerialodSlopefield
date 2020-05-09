@@ -4,11 +4,17 @@ using System.Text;
 
 namespace AerialodSlopefield.Outputs
 {
-    class OutputConsole : IOutput
+    class ConsoleOutput : IOutput
     {
         public void WriteLine(string line)
         {
             Console.WriteLine(line);
         }
+
+        public void Dispose()
+        {
+            // Nothing to dispose for ConsoleOutput
+        }
+
     }
 }

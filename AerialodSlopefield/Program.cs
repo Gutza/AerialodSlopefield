@@ -80,7 +80,8 @@ namespace AerialodSlopefield
             }
 
             var delta = maxVal - minVal;
-            IOutput output = new OutputConsole();
+
+            using IOutput output = InitializeOutput(o.Filename);
             output.WriteLine("ncols " + ysteps);
             output.WriteLine("nrows " + xsteps);
             output.WriteLine("xllcorner " + xmin);
@@ -105,6 +106,16 @@ namespace AerialodSlopefield
                 }
                 output.WriteLine(line.ToString());
             }
+        }
+
+        private static IOutput InitializeOutput(string filename)
+        {
+            if (string.IsNullOrEmpty(filename))
+            {
+                return new ConsoleOutput();
+            }
+
+            return new FileOutput(filename);
         }
 
         private static double MyFunc(double x, double y)
