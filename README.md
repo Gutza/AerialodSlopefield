@@ -2,7 +2,7 @@
 Slopefield data generator for Aerialod
 
 ## What you need
-* This code
+* [This code](https://github.com/Gutza/AerialodSlopefield/archive/master.zip)
 * [.NET Core 3.1 SDK](https://dotnet.microsoft.com/download) – make sure to download the SDK for .NET Core, not the Runtime, and neither .NET Framework
 * [Aerialod](https://ephtracy.github.io/index.html?page=aerialod)
 
