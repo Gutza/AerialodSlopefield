@@ -85,6 +85,16 @@ namespace AerialodSlopefield
             consoleOutput.WriteLine(" finished in " + stopwatch.Elapsed);
 
             var delta = maxVal - minVal;
+            if (delta == 0)
+            {
+                /*
+                 * Fringe case: some smartass is using a constant render function, so the delta is zero.
+                 * Fake a delta equal to their constant value, so we output constant zeroes all over.
+                 * That will teach them, and they shalt be smartasses no more, from henceforth to kingdom come.
+                 * Because that's how smartasses work.
+                 */
+                delta = minVal;
+            }
 
             using IOutput output = InitializeOutput(o.Filename);
             output.WriteLine("ncols " + xsteps);
