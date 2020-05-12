@@ -10,8 +10,10 @@ namespace AerialodSlopefield
         /// <summary>
         /// Change this function in order to generate a different slope field or function graph.
         /// </summary>
-        /// <param name="x">The x coordinate</param>
-        /// <param name="y">The y coordinate</param>
+        /// <param name="x">The x coordinate in the function domain</param>
+        /// <param name="y">The y coordinate in the function domain</param>
+        /// <param name="xindex">The x coordinate in the voxel domain</param>
+        /// <param name="yindex">The y coordinate in the voxel domain</param>
         /// <returns>The value of your function at (x,y)</returns>
         internal static double MyFunction(double x, double y, int xindex, int yindex)
         {
