@@ -192,11 +192,11 @@ namespace AerialodSlopefield
                 var xpos = xmin + xindex * gridStep;
                 if (renderRaw)
                 {
-                    lastResult = RenderFunction.MyFunction(xpos, ypos);
+                    lastResult = RenderFunction.MyFunction(xpos, ypos, xindex, yindex);
                 }
                 else
                 {
-                    lastResult = Math.Atan(RenderFunction.MyFunction(xpos, ypos));
+                    lastResult = Math.Atan(RenderFunction.MyFunction(xpos, ypos, xindex, yindex));
                 }
                 result[xindex] = lastResult;
                 if (double.IsNormal(lastResult))
