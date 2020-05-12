@@ -62,8 +62,8 @@ namespace AerialodSlopefield
             var xmax = Math.Max(o.X1, o.X2);
             var ymin = Math.Min(o.Y1, o.Y2);
             var ymax = Math.Max(o.Y1, o.Y2);
-            var xsteps = (int)Math.Ceiling((xmax - xmin) / o.GridStep);
-            var ysteps = (int)Math.Ceiling((ymax - ymin) / o.GridStep);
+            var xsteps = 1 + (int)Math.Floor((xmax - xmin) / o.GridStep);
+            var ysteps = 1 + (int)Math.Floor((ymax - ymin) / o.GridStep);
             double[][] resultMatrix = new double[ysteps][];
 
             double minVal = double.MaxValue;
